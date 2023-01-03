@@ -1,15 +1,16 @@
 ﻿using Mindmagma.Curses;
+using SadRogue.Primitives;
 
 namespace GoRogue_ncurses_tutorial
 {
     internal class Game
     {
         private readonly IntPtr _window;
-        private int _count;
+        private readonly Player _player;
         public Game()
         {
-            _count = 0;
             _window = NCurses.InitScreen();
+            _player = new Player(new Point(0, 0), '@', 1);
             NCurses.Keypad(_window, true);
             NCurses.NoEcho();
             NCurses.CBreak();
@@ -20,16 +21,22 @@ namespace GoRogue_ncurses_tutorial
             while (true)
             {
                 NCurses.Erase();
-                NCurses.AddString(_count.ToString());
+                NCurses.MoveAddChar(_player.Position.Y, _player.Position.X, _player.displayChar);
                 NCurses.Refresh();
                 var input = NCurses.GetChar();
                 switch (input)
                 {
                     case CursesKey.UP:
-                        _count++;
+                        _player.Position += Direction.Up;
                         break;
                     case CursesKey.DOWN:
-                        _count--;
+                        _player.Position += Direction.Down;
+                        break;
+                    case CursesKey.LEFT:
+                        _player.Position += Direction.Left;
+                        break;
+                    case CursesKey.RIGHT:
+                        _player.Position += Direction.Right;
                         break;
                     case CursesKey.ESC:
                         NCurses.EndWin();
