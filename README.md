@@ -105,6 +105,66 @@ namespace GoRogue_ncurses_tutorial
 }
 ```
 
-# 2. Scaffolding our game
+# 3. Scaffolding a game
 
-Let's begin by making a `Game` class.
+Let's begin by making a `Game` class with a method that runs itself. We'll have a `_count` integer that the user can increment by pressing the up arrow and decrement by pressing down arrow. This will help us understand the core ncurses functions we need to get a game loop going.
+```csharp
+using Mindmagma.Curses;
+
+namespace GoRogue_ncurses_tutorial
+{
+    internal class Game
+    {
+        private readonly IntPtr _window;
+        private int _count;
+        public Game()
+        {
+            _count = 0;
+            _window = NCurses.InitScreen(); //we will keep a pointer to our ncurses window this time
+            NCurses.Keypad(_window, true); //set ncurses to receive input from the keypad
+            NCurses.NoEcho(); //do not display the users input directly to the terminal
+            NCurses.CBreak(); //disable line buffering so that the user doesn't need to submit input with enter
+        }
+
+        public void Run()
+        {
+            while (true)
+            {
+                NCurses.Erase(); //fill the screen with space characters; this is how we clear our window with ncurses
+                NCurses.AddString(_count.ToString());
+                NCurses.Refresh(); //display the current value of count
+                var input = NCurses.GetChar(); //wait for the users input
+                switch (input)
+                {
+                    case CursesKey.UP:
+                        _count++;
+                        break;
+                    case CursesKey.DOWN:
+                        _count--;
+                        break;
+                    case CursesKey.ESC:
+                        NCurses.EndWin();
+                        Environment.Exit(0);
+                        break;
+                }
+            }
+        }
+    }
+}
+```
+
+Now we need to create a `Game` instance and call `Run()` in our `Main` method.
+```csharp
+namespace GoRogue_ncurses_tutorial
+{
+    internal class Program
+    {
+        static void Main(string[] args)
+        {
+            var game = new Game();
+            game.Run();
+        }
+    }
+}
+```
+
